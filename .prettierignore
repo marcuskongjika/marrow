@@ -1,0 +1,10 @@
+out
+dist
+node_modules
+coverage
+build/*.icns
+build/*.ico
+build/*.png
+test-results
+playwright-report
+package-lock.json

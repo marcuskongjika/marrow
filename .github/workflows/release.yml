@@ -1,0 +1,116 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to build and publish (for example v0.1.0)
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            label: macOS (universal dmg + zip)
+            script: dist:mac
+          - os: windows-latest
+            label: Windows (NSIS + portable, x64 + arm64)
+            script: dist:win
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag || github.ref }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Cache Electron download
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/electron
+            ~\AppData\Local\electron\Cache
+          key: electron-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - run: npm ci
+
+      - name: Build and package
+        run: npm run ${{ matrix.script }}
+        env:
+          # Unsigned by default: these are only read if the secrets exist, and
+          # electron-builder skips signing entirely when they are empty.
+          # macOS: a Developer ID Application certificate exported as base64 .p12
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          # macOS notarization (all three must be set for it to run)
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          # Windows: an Authenticode certificate, same base64 .p12 convention
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Collect installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: marrow-${{ runner.os }}
+          path: |
+            dist/*.dmg
+            dist/*.zip
+            dist/*.exe
+            dist/*.blockmap
+            dist/latest*.yml
+          retention-days: 14
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: List what will be published
+        run: ls -lh artifacts
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.tag || github.ref_name }}
+          name: Marrow ${{ github.event.inputs.tag || github.ref_name }}
+          draft: true
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: artifacts/*
+          body: |
+            Marrow ${{ github.event.inputs.tag || github.ref_name }} — a desktop Markdown viewer.
+
+            **Downloads**
+
+            | Platform | File |
+            | --- | --- |
+            | macOS (Apple silicon + Intel) | `Marrow-*-universal.dmg` |
+            | Windows (any architecture) | `Marrow-Setup-*.exe` |
+            | Windows x64 only (smaller) | `Marrow-Setup-*-x64.exe` |
+            | Windows arm64 only (smaller) | `Marrow-Setup-*-arm64.exe` |
+            | Windows, no installer | `Marrow-*-portable.exe` |
+
+            These builds are **unsigned**. macOS will need
+            `xattr -dr com.apple.quarantine /Applications/Marrow.app`, and Windows
+            SmartScreen will need *More info → Run anyway*. See the README for
+            details.

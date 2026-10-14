@@ -1,0 +1,35 @@
+# dependencies
+node_modules/
+
+# build output
+out/
+dist/
+*.tsbuildinfo
+
+# test output
+coverage/
+test-results/
+playwright-report/
+blob-report/
+.playwright-artifacts*/
+
+# editor / OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+*.log
+
+# local env / signing material
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.mobileprovision

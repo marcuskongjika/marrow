@@ -1,0 +1,32 @@
+.scroller {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  outline: none;
+  scroll-behavior: smooth;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  /* Comfortable gutters that grow with the window. */
+  padding-inline: clamp(1.25rem, 6vw, 4.5rem);
+}
+
+.article {
+  position: relative;
+}
+
+/* The raw-source view is one big code block; let it use the full width. */
+.article[data-source-view='true'] {
+  max-width: none;
+}
+
+.article[data-source-view='true'] :global(figure) {
+  max-width: none;
+}
+
+@media print {
+  .scroller {
+    overflow: visible;
+    padding: 0;
+  }
+}

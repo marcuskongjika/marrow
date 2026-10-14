@@ -1,0 +1,122 @@
+.sidebar {
+  flex: 0 0 var(--sidebar-width);
+  width: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg-sunken);
+  border-right: 1px solid var(--border);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem 0.5rem;
+  flex: 0 0 auto;
+}
+
+.heading {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.count {
+  font-size: 0.68rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+}
+
+.empty {
+  margin: 0;
+  padding: 0.25rem 1rem 1rem;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  line-height: 1.5;
+}
+
+.list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0;
+  padding: 0 0.5rem 1.5rem;
+  list-style: none;
+}
+
+.item {
+  position: relative;
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.3rem 0.5rem 0.3rem 0.6rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.805rem;
+  line-height: 1.35;
+  transition:
+    background 120ms var(--ease),
+    color 120ms var(--ease);
+}
+
+.item:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.item[data-active='true'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-weight: 560;
+}
+
+.item[data-active='true']::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.35rem;
+  bottom: 0.35rem;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+
+.item[data-level='0'] {
+  font-weight: 560;
+  color: var(--text);
+}
+
+.item[data-level='0']:not(:first-child) {
+  margin-top: 0.3rem;
+}
+
+.item[data-level='1'] {
+  padding-left: 1.4rem;
+}
+
+.item[data-level='2'] {
+  padding-left: 2.2rem;
+  font-size: 0.775rem;
+}
+
+.item[data-level='3'] {
+  padding-left: 3rem;
+  font-size: 0.775rem;
+}
+
+.label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item[data-level='0'] .label,
+.item[data-active='true'] .label {
+  white-space: normal;
+}

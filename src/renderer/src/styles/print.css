@@ -1,0 +1,66 @@
+/*
+ * Print styles. Ctrl/Cmd+P prints the live window, so everything that is app
+ * chrome has to disappear and the document has to drop its max-width.
+ */
+
+@media print {
+  html,
+  body {
+    height: auto;
+    overflow: visible;
+    background: #fff;
+  }
+
+  [data-print-hide] {
+    display: none !important;
+  }
+
+  .markdown {
+    max-width: none;
+    padding: 0;
+    font-size: 11.5pt;
+    line-height: 1.55;
+    color: #000;
+  }
+
+  .markdown h1,
+  .markdown h2,
+  .markdown h3,
+  .markdown h4 {
+    break-after: avoid;
+    page-break-after: avoid;
+    color: #000;
+  }
+
+  .markdown pre,
+  .markdown .table-scroll,
+  .markdown blockquote,
+  .markdown figure,
+  .markdown img {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .markdown pre.shiki,
+  .markdown pre.shiki span {
+    /* Printers get the light palette regardless of the app theme. */
+    color: var(--shiki-light) !important;
+  }
+
+  .markdown a {
+    color: #1a4a8a;
+    text-decoration: none;
+  }
+
+  .markdown .heading-anchor {
+    display: none;
+  }
+
+  .markdown img {
+    max-width: 100%;
+  }
+}
+
+@page {
+  margin: 16mm 14mm;
+}

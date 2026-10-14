@@ -1,0 +1,132 @@
+/*
+ * Design tokens.
+ *
+ * Marrow's palette is bone and ember: a warm paper white in light mode, a
+ * near-black with a hint of blue in dark mode, and a single burnt-orange accent.
+ * Every colour in the app comes from this file, which is also what makes the
+ * HTML export look identical to the app.
+ */
+
+:root {
+  --font-ui:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text', 'Segoe UI', Inter, system-ui,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-prose:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text', 'Segoe UI', Inter, system-ui,
+    'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, serif;
+  --font-mono:
+    ui-monospace, 'SF Mono', SFMono-Regular, 'Cascadia Code', 'JetBrains Mono', 'Consolas',
+    'Liberation Mono', monospace;
+
+  --measure: 72ch;
+  --radius-sm: 5px;
+  --radius-md: 9px;
+  --radius-lg: 14px;
+
+  --sidebar-width: 268px;
+  --tabbar-height: 42px;
+  --statusbar-height: 28px;
+
+  --ease: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --shadow-sm: 0 1px 2px rgb(20 16 10 / 6%), 0 1px 1px rgb(20 16 10 / 4%);
+  --shadow-md: 0 4px 14px rgb(20 16 10 / 10%), 0 1px 3px rgb(20 16 10 / 6%);
+  --shadow-lg: 0 18px 48px rgb(20 16 10 / 18%), 0 2px 8px rgb(20 16 10 / 8%);
+}
+
+:root,
+[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #fbfaf7;
+  --bg-elevated: #ffffff;
+  --bg-sunken: #f2f0ea;
+  --bg-hover: rgb(26 22 16 / 5%);
+  --bg-active: rgb(26 22 16 / 8%);
+
+  --border: #e6e2d9;
+  --border-strong: #d4cfc3;
+
+  --text: #23262b;
+  --text-strong: #14171a;
+  --text-muted: #6d7177;
+  --text-faint: #9aa0a6;
+
+  --accent: #b1532a;
+  --accent-hover: #943f1b;
+  --accent-contrast: #ffffff;
+  --accent-soft: rgb(177 83 42 / 11%);
+  --accent-ring: rgb(177 83 42 / 35%);
+
+  --code-bg: #f6f4ee;
+  --code-border: #e8e4da;
+  --code-head: #efece4;
+
+  --quote-bar: #d8b79c;
+  --table-stripe: #f7f5f0;
+
+  --mark-bg: #fff3b0;
+  --find-bg: rgb(255 214 102 / 55%);
+  --find-active-bg: #ff9e3d;
+
+  /* Mermaid needs solid colours it can do contrast maths on. */
+  --diagram-node: #f8ece2;
+  --diagram-node-border: #d08a5e;
+  --diagram-alt: #eeeae1;
+  --diagram-line: #b3ab9d;
+  --diagram-label-bg: #fbfaf7;
+
+  --danger: #b3261e;
+  --danger-soft: rgb(179 38 30 / 10%);
+  --success: #1f7a4d;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #15171b;
+  --bg-elevated: #1c1f24;
+  --bg-sunken: #101215;
+  --bg-hover: rgb(255 255 255 / 6%);
+  --bg-active: rgb(255 255 255 / 10%);
+
+  --border: #2a2e35;
+  --border-strong: #3b4048;
+
+  --text: #e2dfd9;
+  --text-strong: #f4f2ee;
+  --text-muted: #9aa0a8;
+  --text-faint: #71777f;
+
+  --accent: #e3925e;
+  --accent-hover: #f0a874;
+  --accent-contrast: #1a1205;
+  --accent-soft: rgb(227 146 94 / 14%);
+  --accent-ring: rgb(227 146 94 / 40%);
+
+  --code-bg: #191c21;
+  --code-border: #272b32;
+  --code-head: #1f232a;
+
+  --quote-bar: #6b5a4a;
+  --table-stripe: #1a1d22;
+
+  --mark-bg: #6a5a1f;
+  --find-bg: rgb(227 146 94 / 35%);
+  --find-active-bg: #d9752e;
+
+  --diagram-node: #2c2319;
+  --diagram-node-border: #9a6137;
+  --diagram-alt: #22262c;
+  --diagram-line: #565c65;
+  --diagram-label-bg: #1c1f24;
+
+  --danger: #f0786d;
+  --danger-soft: rgb(240 120 109 / 12%);
+  --success: #5bbd8c;
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 30%);
+  --shadow-md: 0 4px 16px rgb(0 0 0 / 40%);
+  --shadow-lg: 0 20px 52px rgb(0 0 0 / 55%);
+}

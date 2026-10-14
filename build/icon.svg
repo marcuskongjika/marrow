@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="Marrow">
+  <title>Marrow</title>
+  <desc>A cross-sectioned bone: an ivory cortical ring around an ember marrow cavity.</desc>
+  <defs>
+    <linearGradient id="plate" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#342a20" />
+      <stop offset="0.5" stop-color="#1d1813" />
+      <stop offset="1" stop-color="#100d0a" />
+    </linearGradient>
+    <linearGradient id="bone" x1="0.1" y1="0" x2="0.75" y2="1">
+      <stop offset="0" stop-color="#fffaf1" />
+      <stop offset="0.55" stop-color="#f0e6d4" />
+      <stop offset="1" stop-color="#cdbfa6" />
+    </linearGradient>
+    <linearGradient id="ember" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#f4a86c" />
+      <stop offset="0.45" stop-color="#df7f43" />
+      <stop offset="1" stop-color="#a8481f" />
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.38" r="0.62">
+      <stop offset="0" stop-color="#df7f43" stop-opacity="0.35" />
+      <stop offset="1" stop-color="#df7f43" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <rect width="1024" height="1024" rx="232" fill="url(#plate)" />
+  <rect width="1024" height="1024" rx="232" fill="url(#glow)" />
+
+  <!-- cortical bone wall -->
+  <circle cx="512" cy="512" r="286" fill="none" stroke="url(#bone)" stroke-width="84" />
+
+  <!-- marrow cavity: a quatrefoil, the shape a long bone actually shows in section -->
+  <path
+    fill="url(#ember)"
+    d="M512 296c62 0 112 44 112 100 56 0 100 50 100 112s-44 112-100 112c0 56-50 100-112 100s-112-44-112-100c-56 0-100-50-100-112s44-112 100-112c0-56 50-100 112-100Z"
+  />
+
+  <!-- inner shadow where the cavity meets the wall -->
+  <path
+    fill="none"
+    stroke="#2a1708"
+    stroke-opacity="0.22"
+    stroke-width="18"
+    d="M512 296c62 0 112 44 112 100 56 0 100 50 100 112s-44 112-100 112c0 56-50 100-112 100s-112-44-112-100c-56 0-100-50-100-112s44-112 100-112c0-56 50-100 112-100Z"
+  />
+</svg>

@@ -1,0 +1,136 @@
+# electron-builder configuration
+#
+# Builds are unsigned by default. Signing and notarization are opt-in through
+# environment variables - see "Code signing and notarization" in the README.
+#
+# Every dependency is bundled into `out/` by electron-vite, so the packaged app
+# ships no node_modules at all; `files` only needs the build output, the icon and
+# package.json.
+
+appId: com.marrow.viewer
+productName: Marrow
+copyright: Copyright © 2026 Marrow Contributors
+
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - out/**/*
+  - '!out/**/*.map'
+  - package.json
+
+# Shrink the shipped Electron a little: locales other than English are not used.
+electronLanguages:
+  - en-US
+
+asar: true
+compression: maximum
+removePackageScripts: true
+removePackageKeywords: true
+
+extraMetadata:
+  main: out/main/index.js
+
+fileAssociations:
+  - ext: md
+    name: Markdown Document
+    description: Markdown Document
+    role: Viewer
+    rank: Default
+    icon: build/icon.ico
+    mimeType: text/markdown
+  - ext: markdown
+    name: Markdown Document
+    description: Markdown Document
+    role: Viewer
+    rank: Default
+    icon: build/icon.ico
+    mimeType: text/markdown
+  - ext: mdown
+    name: Markdown Document
+    description: Markdown Document
+    role: Viewer
+    rank: Alternate
+    icon: build/icon.ico
+    mimeType: text/markdown
+  - ext: mkd
+    name: Markdown Document
+    description: Markdown Document
+    role: Viewer
+    rank: Alternate
+    icon: build/icon.ico
+    mimeType: text/markdown
+
+mac:
+  category: public.app-category.productivity
+  icon: build/icon.icns
+  target:
+    - target: dmg
+      arch: [universal]
+    - target: zip
+      arch: [universal]
+  darkModeSupport: true
+  # Hardened runtime is required for notarization; it is harmless unsigned.
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  extendInfo:
+    NSHumanReadableCopyright: Copyright © 2026 Marrow Contributors
+    # Marrow has no need for any of these; declaring nothing keeps the OS from
+    # ever prompting on the user's behalf.
+    NSCameraUsageDescription: null
+    NSMicrophoneUsageDescription: null
+    LSMinimumSystemVersion: '11.0'
+
+dmg:
+  title: ${productName} ${version}
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  contents:
+    - x: 140
+      y: 190
+    - x: 400
+      y: 190
+      type: link
+      path: /Applications
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64, arm64]
+    - target: portable
+      arch: [x64, arm64]
+  # Shows up in Explorer's "Details" pane and the installer metadata.
+  legalTrademarks: ''
+
+nsis:
+  # Per-user install: no UAC prompt, no admin rights needed.
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: false
+  createStartMenuShortcut: true
+  shortcutName: Marrow
+  artifactName: ${productName}-Setup-${version}-${arch}.${ext}
+  deleteAppDataOnUninstall: false
+  # Lets a second install of the same version overwrite cleanly.
+  differentialPackage: false
+
+portable:
+  artifactName: ${productName}-${version}-${arch}-portable.${ext}
+
+linux:
+  # Not an officially supported target, but the build works and costs nothing
+  # to keep: handy for trying Marrow in CI containers.
+  icon: build/icons
+  category: Office
+  target:
+    - AppImage
+  desktop:
+    entry:
+      MimeType: text/markdown;text/x-markdown
+      StartupWMClass: Marrow
+
+publish: null

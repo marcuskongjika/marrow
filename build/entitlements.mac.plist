@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Entitlements for the macOS hardened runtime.
+
+  Marrow reads markdown files and the images beside them, and nothing else. Only
+  the two entitlements Electron itself requires are granted, plus read access to
+  user-selected files so the Open dialog works. There is no network, camera,
+  microphone, or arbitrary filesystem entitlement.
+-->
+<plist version="1.0">
+  <dict>
+    <!-- Required by Electron: V8 generates and runs code at runtime. -->
+    <key>com.apple.security.cs.allow-jit</key>
+    <true/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <!-- Lets the Open dialog and "Open with Marrow" hand us a file to read. -->
+    <key>com.apple.security.files.user-selected.read-only</key>
+    <true/>
+  </dict>
+</plist>

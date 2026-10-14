@@ -1,0 +1,98 @@
+.bar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: var(--statusbar-height);
+  padding: 0 0.5rem 0 0.35rem;
+  background: var(--bg-sunken);
+  border-top: 1px solid var(--border);
+  font-size: 0.715rem;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.path {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  font-size: inherit;
+  transition:
+    background 120ms var(--ease),
+    color 120ms var(--ease);
+}
+
+.path:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-muted);
+}
+
+.path:disabled {
+  cursor: default;
+}
+
+.pathText {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  direction: rtl;
+  text-align: left;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex: 0 0 auto;
+  padding-right: 0.15rem;
+}
+
+.item {
+  white-space: nowrap;
+}
+
+.sep {
+  width: 1px;
+  height: 11px;
+  background: var(--border-strong);
+  opacity: 0.7;
+}
+
+.reloaded {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 600;
+  /* Appears, holds, then retires itself. Driven entirely by CSS so the status
+     bar needs no timer and no state of its own. */
+  animation:
+    pop 180ms var(--ease),
+    retire 320ms var(--ease) 2.1s forwards;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes retire {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}

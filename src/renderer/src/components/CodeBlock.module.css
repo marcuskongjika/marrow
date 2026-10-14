@@ -1,0 +1,81 @@
+.block {
+  margin: 0 0 var(--prose-gap);
+  border: 1px solid var(--code-border);
+  border-radius: var(--radius-md);
+  background: var(--code-bg);
+  overflow: hidden;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.3em 0.55em 0.3em 0.9em;
+  background: var(--code-head);
+  border-bottom: 1px solid var(--code-border);
+  font-family: var(--font-ui);
+  font-size: 0.68em;
+  user-select: none;
+}
+
+.language {
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+.copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.25em 0.5em;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 1em;
+  font-weight: 550;
+  opacity: 0;
+  transition:
+    opacity 140ms var(--ease),
+    background 140ms var(--ease),
+    color 140ms var(--ease);
+}
+
+.block:hover .copy,
+.copy:focus-visible {
+  opacity: 1;
+}
+
+.copy:hover {
+  background: var(--bg-hover);
+  color: var(--text);
+}
+
+.copy[data-copied='true'] {
+  opacity: 1;
+  color: var(--success);
+}
+
+.copyLabel {
+  font-variant-numeric: tabular-nums;
+}
+
+.body {
+  display: block;
+}
+
+/* Long single-line blocks should scroll inside the card, not stretch it. */
+.body > :global(pre) {
+  max-width: 100%;
+}
+
+@media print {
+  .copy {
+    display: none;
+  }
+
+  .block {
+    background: #fff;
+  }
+}
