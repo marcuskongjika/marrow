@@ -6,8 +6,9 @@
 
 **Read your notes down to the bone.**
 
-A fast, quiet desktop Markdown viewer for macOS and Windows. Not an editor, not
-a browser tab — a reader, built for the folder of `.md` files you actually keep.
+A fast, quiet desktop Markdown and PDF viewer for macOS and Windows. Not an
+editor, not a browser tab — a reader, built for the folder of `.md` files (and
+the PDFs beside them) you actually keep.
 
 [Install](#install) · [Shortcuts](#keyboard-shortcuts) · [Architecture](#architecture) · [Contributing](#contributing)
 
@@ -46,6 +47,10 @@ strict Content-Security-Policy, and never gives the page a filesystem.
   to match the app theme and redrawn when it changes; a diagram that will not
   parse gets a friendly inline error box instead of taking the page down
 - YAML frontmatter is hidden, and its `title` names the tab
+- PDFs, rendered with [pdf.js](https://mozilla.github.io/pdf.js/): pages are
+  painted lazily as you scroll, text is selectable and searchable with the same
+  find bar, bookmarks fill the outline sidebar, and zoom and live reload work
+  just as they do for markdown
 - A typographic stylesheet built for long reading: a 72-character measure, a
   real heading scale, serif blockquotes, striped scrollable tables
 
@@ -53,7 +58,8 @@ strict Content-Security-Policy, and never gives the page a filesystem.
 
 - File ▸ Open, drag-and-drop anywhere on the window, or "Open with Marrow" from
   Finder and Explorer
-- Registered for `.md`, `.markdown`, `.mdown` and `.mkd`
+- Registered for `.md`, `.markdown`, `.mdown` and `.mkd`, and offered under
+  "Open With" for `.pdf` (without taking over as your default PDF viewer)
 - Accepts a path when launched from a terminal or a script, e.g.
   `"%LOCALAPPDATA%\Programs\Marrow\Marrow.exe" notes.md` or
   `open -a Marrow notes.md` (Marrow does not install a `marrow` shim on `PATH`)
@@ -66,8 +72,8 @@ strict Content-Security-Policy, and never gives the page a filesystem.
 - Find in document with a live match count and next/previous, scoped to the
   document so the sidebar and tab labels never inflate the count
 - Tabs, with `Ctrl+Tab` cycling and middle-click to close
-- Relative links to other markdown files open in a tab; everything else opens in
-  your browser or the OS handler
+- Relative links to other markdown files and PDFs open in a tab; everything else
+  opens in your browser or the OS handler
 - Heading anchors, smooth scrolling to `#fragments`, and per-file scroll
   positions for the session
 

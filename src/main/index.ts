@@ -1,7 +1,7 @@
 import { app, nativeTheme } from 'electron'
 import { existsSync, statSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { isMarkdownFile } from './fileAccess'
+import { isDocumentFile } from './fileAccess'
 import { registerIpcHandlers } from './ipc'
 import { rebuildMenu, setAboutPanel } from './menu'
 import { hardenSession, registerProtocolHandlers, registerSchemesAsPrivileged } from './protocol'
@@ -34,12 +34,12 @@ if (process.platform === 'win32') {
   app.setAppUserModelId('com.marrow.viewer')
 }
 
-/** Pull markdown paths out of a process argv vector. */
+/** Pull markdown and PDF paths out of a process argv vector. */
 export function markdownPathsFromArgv(argv: string[], cwd: string): string[] {
   const paths: string[] = []
   for (const argument of argv.slice(1)) {
     if (argument.startsWith('-') || argument === '.' || argument === '') continue
-    if (!isMarkdownFile(argument)) continue
+    if (!isDocumentFile(argument)) continue
     const absolute = resolve(cwd, argument)
     try {
       if (existsSync(absolute) && statSync(absolute).isFile()) paths.push(absolute)

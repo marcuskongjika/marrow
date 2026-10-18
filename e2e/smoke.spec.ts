@@ -75,7 +75,9 @@ test('shows the empty state when launched with no document', async () => {
   try {
     await expect(page.getByTestId('empty-state')).toBeVisible()
     await expect(page.getByTestId('open-file')).toBeVisible()
-    await expect(page.getByText('or drop a Markdown file anywhere in this window')).toBeVisible()
+    await expect(
+      page.getByText('or drop a Markdown or PDF file anywhere in this window')
+    ).toBeVisible()
     expect(await page.title()).toBe('Marrow')
     expect(problems(messages)).toEqual([])
   } finally {
@@ -244,6 +246,52 @@ test('opens a relative markdown link in a new tab', async () => {
     await expect(page.locator('article.markdown h1')).toHaveText(/Linked Document/)
     await expect(page).toHaveTitle(/^Linked Document — Marrow$/)
     expect(await page.getByRole('tab').count()).toBe(2)
+  } finally {
+    await app.close()
+  }
+})
+
+test('opens a PDF with pages, outline, find and page count', async () => {
+  const { app, page, messages } = await launch([join(FIXTURES, 'sample.pdf')])
+  try {
+    const pages = page.getByTestId('pdf-pages')
+    await expect(pages.locator('[data-page-number]')).toHaveCount(3)
+    await expect(page).toHaveTitle(/^Marrow PDF Fixture — Marrow$/)
+
+    // The visible page is actually painted: its canvas holds non-white pixels.
+    const firstCanvas = pages.locator('[data-page-number="1"] canvas')
+    await expect
+      .poll(() =>
+        firstCanvas.evaluate((canvas: HTMLCanvasElement) => {
+          const context = canvas.getContext('2d')
+          if (!context || canvas.width === 0) return 0
+          const { data } = context.getImageData(0, 0, canvas.width, canvas.height)
+          let dark = 0
+          for (let index = 0; index < data.length; index += 4) {
+            if ((data[index] ?? 255) < 128) dark += 1
+          }
+          return dark
+        })
+      )
+      .toBeGreaterThan(100)
+
+    // The text layer carries the real text, so find works across pages.
+    await expect(pages.getByText('Chapter Two', { exact: true })).toBeAttached()
+    await page.getByTitle('Find in document (Ctrl+F)').click()
+    const input = page.getByTestId('find-input')
+    await input.fill('page')
+    await expect(page.getByTestId('find-count')).toHaveText('1 of 3')
+    await input.press('Escape')
+
+    // Bookmarks feed the sidebar and jump to their page.
+    const toc = page.getByTestId('toc')
+    await expect(toc.getByRole('button', { name: 'Introduction' })).toBeVisible()
+    await toc.getByRole('button', { name: 'Chapter Two' }).click()
+    const scroller = page.getByTestId('reader-scroller')
+    await expect.poll(() => scroller.evaluate((node) => node.scrollTop)).toBeGreaterThan(500)
+
+    await expect(page.getByTestId('status-bar')).toContainText('3 pages')
+    expect(problems(messages)).toEqual([])
   } finally {
     await app.close()
   }

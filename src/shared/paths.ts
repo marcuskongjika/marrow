@@ -7,7 +7,7 @@
  * need live here and are unit tested against both Windows and POSIX shapes.
  */
 
-import { MARKDOWN_EXTENSIONS } from './types'
+import { MARKDOWN_EXTENSIONS, PDF_EXTENSIONS } from './types'
 
 const WINDOWS_DRIVE_ABS = /^[a-zA-Z]:[\\/]/
 const WINDOWS_DRIVE_ONLY = /^[a-zA-Z]:$/
@@ -113,6 +113,10 @@ export function resolveFrom(baseDir: string, relative: string): string {
 
 export function isMarkdownPath(input: string): boolean {
   return (MARKDOWN_EXTENSIONS as readonly string[]).includes(extname(input))
+}
+
+export function isPdfPath(input: string): boolean {
+  return (PDF_EXTENSIONS as readonly string[]).includes(extname(input))
 }
 
 /** Case-insensitive on Windows, exact elsewhere. */

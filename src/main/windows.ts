@@ -2,7 +2,7 @@ import { BrowserWindow, app, nativeTheme, screen, shell } from 'electron'
 import { join } from 'node:path'
 import { APP_INDEX_URL } from './protocol'
 import { store, DEFAULT_BOUNDS, type WindowBounds } from './store'
-import { openMarkdownFile } from './fileAccess'
+import { openDocumentFile } from './fileAccess'
 import { unwatchOwner } from './watcher'
 import { IPC, type OpenedFile, type ResolvedTheme, type ThemeState } from '../shared/types'
 
@@ -207,7 +207,7 @@ export async function openPaths(paths: string[], target?: BrowserWindow): Promis
   const window = target ?? ensureWindow()
 
   for (const candidate of paths) {
-    const outcome = await openMarkdownFile(candidate)
+    const outcome = await openDocumentFile(candidate)
     if (!outcome.ok) {
       report.failures.push({ path: outcome.path ?? String(candidate), error: outcome.error })
       continue

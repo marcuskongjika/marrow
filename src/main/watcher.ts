@@ -1,5 +1,5 @@
 import { watch, type FSWatcher } from 'chokidar'
-import { rereadMarkdownFile } from './fileAccess'
+import { rereadDocumentFile } from './fileAccess'
 import type { FileChangedPayload } from '../shared/types'
 
 /**
@@ -35,7 +35,7 @@ export function watchFile(ownerId: number, filePath: string, onChange: ChangeHan
   })
 
   const reload = (): void => {
-    void rereadMarkdownFile(filePath).then((result) => {
+    void rereadDocumentFile(filePath).then((result) => {
       if (!result) return
       onChange({ path: filePath, content: result.content, mtimeMs: result.mtimeMs })
     })

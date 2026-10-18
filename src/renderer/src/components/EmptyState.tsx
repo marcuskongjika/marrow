@@ -58,7 +58,7 @@ export function EmptyState({
           <kbd className={styles.kbd}>{openShortcut}</kbd>
         </button>
 
-        <p className={styles.dropHint}>…or drop a Markdown file anywhere in this window</p>
+        <p className={styles.dropHint}>…or drop a Markdown or PDF file anywhere in this window</p>
       </div>
 
       {recentFiles.length > 0 && (

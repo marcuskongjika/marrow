@@ -47,7 +47,19 @@ jobs:
       - run: npm ci
 
       - name: Build and package
-        run: npm run ${{ matrix.script }}
+        shell: bash
+        run: |
+          extra=()
+          if [ "$RUNNER_OS" = "macOS" ] && [ -z "$CSC_LINK" ]; then
+            # No Developer ID certificate: ad-hoc sign instead of shipping
+            # unsigned, because Apple silicon refuses to launch unsigned code.
+            extra=(
+              -c.mac.identity=-
+              -c.mac.entitlements=build/entitlements.mac.adhoc.plist
+              -c.mac.entitlementsInherit=build/entitlements.mac.adhoc.plist
+            )
+          fi
+          npm run ${{ matrix.script }} -- "${extra[@]}"
         env:
           # Unsigned by default: these are only read if the secrets exist, and
           # electron-builder skips signing entirely when they are empty.
@@ -98,13 +110,14 @@ jobs:
           fail_on_unmatched_files: true
           files: artifacts/*
           body: |
-            Marrow ${{ github.event.inputs.tag || github.ref_name }} — a desktop Markdown viewer.
+            Marrow ${{ github.event.inputs.tag || github.ref_name }} — a desktop Markdown and PDF viewer.
 
             **Downloads**
 
             | Platform | File |
             | --- | --- |
             | macOS (Apple silicon + Intel) | `Marrow-*-universal.dmg` |
+            | macOS, no installer | `Marrow-*-universal-mac.zip` |
             | Windows (any architecture) | `Marrow-Setup-*.exe` |
             | Windows x64 only (smaller) | `Marrow-Setup-*-x64.exe` |
             | Windows arm64 only (smaller) | `Marrow-Setup-*-arm64.exe` |

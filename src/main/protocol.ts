@@ -45,7 +45,9 @@ const MIME_TYPES = new Map<string, string>([
   ['.webm', 'video/webm'],
   ['.mp3', 'audio/mpeg'],
   ['.wav', 'audio/wav'],
-  ['.ogg', 'audio/ogg']
+  ['.ogg', 'audio/ogg'],
+  ['.pdf', 'application/pdf'],
+  ['.wasm', 'application/wasm']
 ])
 
 /** Media the document protocol is allowed to serve. Markdown goes through IPC. */
@@ -63,7 +65,9 @@ const SERVABLE_ASSETS = new Set([
   '.webm',
   '.mp3',
   '.wav',
-  '.ogg'
+  '.ogg',
+  // Fetched by the PDF view and handed to pdf.js as bytes, never navigated to.
+  '.pdf'
 ])
 
 function mimeFor(filePath: string): string {
@@ -74,11 +78,13 @@ function mimeFor(filePath: string): string {
  * Production CSP. `style-src` needs `'unsafe-inline'` because Mermaid injects a
  * `<style>` element into every diagram it renders, and Shiki/KaTeX set inline
  * `style` attributes. Scripts stay locked to the app origin, and `eval` is never
- * allowed - Shiki runs on its JavaScript RegExp engine so no wasm is needed.
+ * allowed - Shiki runs on its JavaScript RegExp engine. `'wasm-unsafe-eval'`
+ * only permits compiling WebAssembly, which pdf.js uses for its JPEG 2000,
+ * JBIG2 and colour-profile decoders; it does not enable `eval` or `Function`.
  */
 const PROD_CSP = [
   "default-src 'none'",
-  "script-src 'self'",
+  "script-src 'self' 'wasm-unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${LOCAL_FILE_SCHEME}:`,
   `media-src 'self' ${LOCAL_FILE_SCHEME}:`,
@@ -99,7 +105,7 @@ const PROD_CSP = [
  */
 const DEV_CSP = [
   "default-src 'none'",
-  "script-src 'self' 'unsafe-inline'",
+  "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
   "style-src 'self' 'unsafe-inline'",
   `img-src 'self' data: blob: ${LOCAL_FILE_SCHEME}:`,
   `media-src 'self' ${LOCAL_FILE_SCHEME}:`,

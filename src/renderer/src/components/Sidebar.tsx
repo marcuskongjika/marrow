@@ -12,10 +12,18 @@ export interface SidebarProps {
   toc: TocEntry[]
   activeId: string | null
   documentTitle: string
+  /** PDFs have bookmarks rather than headings, which changes the empty message. */
+  isPdf: boolean
   onSelect: (id: string) => void
 }
 
-export function Sidebar({ toc, activeId, documentTitle, onSelect }: SidebarProps): JSX.Element {
+export function Sidebar({
+  toc,
+  activeId,
+  documentTitle,
+  isPdf,
+  onSelect
+}: SidebarProps): JSX.Element {
   const listRef = useRef<HTMLUListElement>(null)
   const activeRef = useRef<HTMLButtonElement>(null)
 
@@ -53,7 +61,11 @@ export function Sidebar({ toc, activeId, documentTitle, onSelect }: SidebarProps
 
       {entries.length === 0 ? (
         <p className={styles.empty}>
-          {documentTitle === '' ? 'No document open.' : 'This document has no headings.'}
+          {documentTitle === ''
+            ? 'No document open.'
+            : isPdf
+              ? 'This PDF has no bookmarks.'
+              : 'This document has no headings.'}
         </p>
       ) : (
         <ul className={styles.list} ref={listRef}>

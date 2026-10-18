@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react'
 import type { Root } from 'hast'
-import { renderMarkdown, renderSource, type RenderResult } from '@shared/markdown'
-import type { FileChangedPayload, OpenedFile } from '@shared/types'
+import { renderMarkdown, renderSource, type RenderResult, type TocEntry } from '@shared/markdown'
+import type { DocumentKind, FileChangedPayload, OpenedFile } from '@shared/types'
 
 /**
  * Tab and document state.
@@ -11,9 +11,24 @@ import type { FileChangedPayload, OpenedFile } from '@shared/types'
  * `revision` that is bumped whenever its content changes (first load, live
  * reload, manual reload); a render is in sync when `renderedRevision` catches
  * up. Stale async renders are therefore discarded instead of flickering.
+ *
+ * PDFs share the same lifecycle, but their "render" happens in the PDF view:
+ * it loads the bytes for the current revision and reports back with `pdf-loaded`.
+ * A PDF has no text in `content`, so its changes are detected by mtime.
  */
 
+/** What the PDF view learned about a loaded PDF. */
+export interface PdfInfo {
+  pageCount: number
+  title: string | null
+  /** The PDF outline, flattened into sidebar entries. */
+  toc: TocEntry[]
+  /** The 1-based page each outline entry points at, by entry id. */
+  outlinePages: Record<string, number>
+}
+
 export interface DocumentState {
+  kind: DocumentKind
   path: string
   name: string
   content: string
@@ -21,6 +36,7 @@ export interface DocumentState {
   revision: number
   renderedRevision: number
   render: RenderResult | null
+  pdf: PdfInfo | null
   error: string | null
   showSource: boolean
   sourceTree: Root | null
@@ -37,6 +53,7 @@ type Action =
   | { type: 'open'; file: OpenedFile }
   | { type: 'changed'; payload: FileChangedPayload }
   | { type: 'rendered'; path: string; revision: number; result: RenderResult }
+  | { type: 'pdf-loaded'; path: string; revision: number; info: PdfInfo }
   | { type: 'failed'; path: string; revision: number; message: string }
   | { type: 'source-rendered'; path: string; revision: number; tree: Root }
   | { type: 'close'; path: string }
@@ -49,6 +66,7 @@ const initialState: State = { docs: [], activePath: null }
 
 function makeDocument(file: OpenedFile): DocumentState {
   return {
+    kind: file.kind,
     path: file.path,
     name: file.name,
     content: file.content,
@@ -56,12 +74,18 @@ function makeDocument(file: OpenedFile): DocumentState {
     revision: 1,
     renderedRevision: 0,
     render: null,
+    pdf: null,
     error: null,
     showSource: false,
     sourceTree: null,
     sourceRevision: 0,
     reloadedAt: null
   }
+}
+
+/** Markdown changes when its text does; a PDF when the file on disk does. */
+function hasChanged(doc: DocumentState, content: string, mtimeMs: number): boolean {
+  return doc.kind === 'pdf' ? doc.mtimeMs !== mtimeMs : doc.content !== content
 }
 
 function replace(
@@ -92,7 +116,7 @@ function reducer(state: State, action: Action): State {
           activePath: action.file.path
         }
       }
-      const contentChanged = existing.content !== action.file.content
+      const contentChanged = hasChanged(existing, action.file.content, action.file.mtimeMs)
       return {
         docs: contentChanged
           ? replace(state.docs, action.file.path, (doc) => ({
@@ -109,7 +133,9 @@ function reducer(state: State, action: Action): State {
 
     case 'changed': {
       const existing = state.docs.find((doc) => doc.path === action.payload.path)
-      if (!existing || existing.content === action.payload.content) return state
+      if (!existing || !hasChanged(existing, action.payload.content, action.payload.mtimeMs)) {
+        return state
+      }
       return {
         ...state,
         docs: replace(state.docs, action.payload.path, (doc) => ({
@@ -130,6 +156,16 @@ function reducer(state: State, action: Action): State {
           doc.revision !== action.revision
             ? doc
             : { ...doc, render: action.result, renderedRevision: action.revision, error: null }
+        )
+      }
+
+    case 'pdf-loaded':
+      return {
+        ...state,
+        docs: replace(state.docs, action.path, (doc) =>
+          doc.revision !== action.revision
+            ? doc
+            : { ...doc, pdf: action.info, renderedRevision: action.revision, error: null }
         )
       }
 
@@ -179,7 +215,10 @@ function reducer(state: State, action: Action): State {
       if (target === null) return state
       return {
         ...state,
-        docs: replace(state.docs, target, (doc) => ({ ...doc, showSource: !doc.showSource }))
+        docs: replace(state.docs, target, (doc) =>
+          // A PDF has no markdown source to show.
+          doc.kind === 'pdf' ? doc : { ...doc, showSource: !doc.showSource }
+        )
       }
     }
 
@@ -199,6 +238,8 @@ export interface DocumentsApi {
   activate: (path: string) => void
   cycle: (delta: number) => void
   toggleSource: (path?: string) => void
+  pdfLoaded: (path: string, revision: number, info: PdfInfo) => void
+  pdfFailed: (path: string, revision: number, message: string) => void
 }
 
 export function useDocuments(): DocumentsApi {
@@ -214,7 +255,7 @@ export function useDocuments(): DocumentsApi {
   // Render any document whose content has moved ahead of its rendered tree.
   useEffect(() => {
     for (const doc of state.docs) {
-      if (doc.renderedRevision === doc.revision) continue
+      if (doc.kind !== 'markdown' || doc.renderedRevision === doc.revision) continue
       const key = `${doc.path}@${doc.revision}`
       if (inFlight.current.has(key)) continue
       inFlight.current.add(key)
@@ -303,6 +344,14 @@ export function useDocuments(): DocumentsApi {
     dispatch(path === undefined ? { type: 'toggle-source' } : { type: 'toggle-source', path })
   }, [])
 
+  const pdfLoaded = useCallback((path: string, revision: number, info: PdfInfo) => {
+    dispatch({ type: 'pdf-loaded', path, revision, info })
+  }, [])
+
+  const pdfFailed = useCallback((path: string, revision: number, message: string) => {
+    dispatch({ type: 'failed', path, revision, message })
+  }, [])
+
   return {
     docs: state.docs,
     active,
@@ -313,6 +362,8 @@ export function useDocuments(): DocumentsApi {
     closeActive,
     activate,
     cycle,
-    toggleSource
+    toggleSource,
+    pdfLoaded,
+    pdfFailed
   }
 }

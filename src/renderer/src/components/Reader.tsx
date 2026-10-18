@@ -176,8 +176,8 @@ export function Reader({
         scrollToId(data.anchor)
         return
       }
-      if (data.localMd) {
-        onOpenPath(data.localMd, data.hash)
+      if (data.localDoc) {
+        onOpenPath(data.localDoc, data.hash)
         return
       }
       if (data.localFile) {

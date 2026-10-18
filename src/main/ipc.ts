@@ -1,6 +1,8 @@
 import { BrowserWindow, app, dialog, ipcMain, shell, type WebContents } from 'electron'
 import {
+  DOCUMENT_EXTENSIONS,
   MARKDOWN_EXTENSIONS,
+  PDF_EXTENSIONS,
   IPC,
   type AppInfo,
   type ExportRequest,
@@ -40,6 +42,10 @@ function asNonEmptyString(value: unknown): string | null {
   const trimmed = value.trim()
   if (trimmed === '' || trimmed.includes('\0')) return null
   return trimmed
+}
+
+function bare(extension: string): string {
+  return extension.replace('.', '')
 }
 
 function windowFor(contents: WebContents): BrowserWindow | null {
@@ -89,13 +95,12 @@ export function registerIpcHandlers(): void {
   ipcMain.handle(IPC.openDialog, async (event): Promise<OpenReport> => {
     const window = windowFor(event.sender)
     const options: Electron.OpenDialogOptions = {
-      title: 'Open Markdown',
+      title: 'Open Document',
       properties: ['openFile', 'multiSelections'],
       filters: [
-        {
-          name: 'Markdown',
-          extensions: MARKDOWN_EXTENSIONS.map((extension) => extension.replace('.', ''))
-        },
+        { name: 'Markdown and PDF', extensions: DOCUMENT_EXTENSIONS.map(bare) },
+        { name: 'Markdown', extensions: MARKDOWN_EXTENSIONS.map(bare) },
+        { name: 'PDF', extensions: PDF_EXTENSIONS.map(bare) },
         { name: 'All Files', extensions: ['*'] }
       ]
     }

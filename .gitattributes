@@ -1,0 +1,4 @@
+# Prettier enforces LF; without this, Windows checkouts get CRLF and fail CI.
+* text=auto eol=lf
+# Hand-written fixture PDFs are plain text, but their xref offsets are bytes.
+*.pdf binary

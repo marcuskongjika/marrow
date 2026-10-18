@@ -6,6 +6,7 @@ import {
   isAbsolutePath,
   isExternalHref,
   isMarkdownPath,
+  isPdfPath,
   resolveFrom,
   splitHref
 } from '../paths'
@@ -17,8 +18,9 @@ import { localFileUrl } from '../token'
  *
  * - `<img src="./diagram.png">` becomes `marrow-file://local/<token>`, which the
  *   main process serves after checking the path against the granted roots.
- * - Links to other markdown files get `data-local-md` with the resolved absolute
- *   path, so clicking one opens a tab in Marrow instead of navigating the window.
+ * - Links to other markdown files and PDFs get `data-local-doc` with the resolved
+ *   absolute path, so clicking one opens a tab in Marrow instead of navigating
+ *   the window.
  * - Links to other local files get `data-local-file` and are handed to the OS.
  * - External links get `data-external` plus `rel="noopener noreferrer"`.
  */
@@ -133,8 +135,11 @@ function rewriteLink(node: Element, baseDir: string | null): void {
 function applyLocalTarget(node: Element, absolutePath: string, hash: string): void {
   node.properties ??= {}
   if (isMarkdownPath(absolutePath)) {
-    node.properties.dataLocalMd = absolutePath
+    node.properties.dataLocalDoc = absolutePath
     if (hash) node.properties.dataHash = hash.slice(1)
+  } else if (isPdfPath(absolutePath)) {
+    // PDFs open in a Marrow tab too; a page hash is not meaningful there.
+    node.properties.dataLocalDoc = absolutePath
   } else {
     node.properties.dataLocalFile = absolutePath
   }

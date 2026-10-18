@@ -6,6 +6,8 @@ import styles from './StatusBar.module.css'
 export interface StatusBarProps {
   path: string | null
   stats: DocStats | null
+  /** Set for PDFs, which show a page count instead of word stats. */
+  pageCount: number | null
   zoom: number
   /** Timestamp of the last live reload, or null if the file has not changed. */
   reloadedAt: number | null
@@ -21,7 +23,14 @@ function readingTime(minutes: number): string {
   return `${minutes} min read`
 }
 
-export function StatusBar({ path, stats, zoom, reloadedAt, busy }: StatusBarProps): JSX.Element {
+export function StatusBar({
+  path,
+  stats,
+  pageCount,
+  zoom,
+  reloadedAt,
+  busy
+}: StatusBarProps): JSX.Element {
   return (
     <footer className={styles.bar} data-testid="status-bar" data-print-hide="">
       <button
@@ -47,6 +56,11 @@ export function StatusBar({ path, stats, zoom, reloadedAt, busy }: StatusBarProp
           </span>
         )}
         {busy && <span className={styles.item}>Rendering…</span>}
+        {pageCount !== null && (
+          <span className={styles.item}>
+            {formatCount(pageCount)} {pageCount === 1 ? 'page' : 'pages'}
+          </span>
+        )}
         {stats && (
           <>
             <span className={styles.item}>{formatCount(stats.words)} words</span>

@@ -5,9 +5,18 @@
  */
 
 export const MARKDOWN_EXTENSIONS = ['.md', '.markdown', '.mdown', '.mkd'] as const
+export const PDF_EXTENSIONS = ['.pdf'] as const
+
+/** Everything Marrow can open in a tab. */
+export const DOCUMENT_EXTENSIONS = [...MARKDOWN_EXTENSIONS, ...PDF_EXTENSIONS] as const
+
+export type DocumentKind = 'markdown' | 'pdf'
 
 /** Hard ceiling on files we will read, so a stray 2 GB file cannot wedge the UI. */
 export const MAX_FILE_BYTES = 32 * 1024 * 1024
+
+/** PDFs are streamed to pdf.js rather than held as a string, so they can be larger. */
+export const MAX_PDF_BYTES = 512 * 1024 * 1024
 
 export const ZOOM_LEVELS = [0.7, 0.8, 0.9, 1, 1.1, 1.25, 1.5, 1.75, 2, 2.5] as const
 export const DEFAULT_ZOOM = 1
@@ -35,8 +44,13 @@ export interface RecentFile {
 
 export const MAX_RECENT_FILES = 10
 
-/** A markdown file read by the main process and handed to the renderer. */
+/**
+ * A document opened by the main process and handed to the renderer. Markdown
+ * arrives with its text in `content`; a PDF arrives with `content` empty and the
+ * renderer loads its bytes through `marrow-file://`.
+ */
 export interface OpenedFile {
+  kind: DocumentKind
   path: string
   name: string
   dir: string

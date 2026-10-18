@@ -12,6 +12,7 @@ import {
 } from '@shared/types'
 import { EmptyState } from './components/EmptyState'
 import { FindBar } from './components/FindBar'
+import { PdfView } from './components/PdfView'
 import { Reader } from './components/Reader'
 import { ShortcutsOverlay } from './components/ShortcutsOverlay'
 import { Sidebar } from './components/Sidebar'
@@ -21,6 +22,7 @@ import { Toasts } from './components/Toasts'
 import { useToasts } from './hooks/useToasts'
 import { buildStandaloneHtml } from './lib/exportDocument'
 import { clearHighlights, findInElement, paintHighlights, revealRange } from './lib/find'
+import { pageAnchor } from './lib/pdf'
 import { forgetScroll } from './lib/scrollMemory'
 import { bootstrapPromise, receiveOpenedFiles } from './state/bootstrap'
 import { useDocuments } from './state/documents'
@@ -50,8 +52,19 @@ function sameSettings(a: Settings, b: Settings): boolean {
 
 export function App(): JSX.Element {
   const documents = useDocuments()
-  const { docs, active, openFile, fileChanged, close, closeActive, activate, cycle, toggleSource } =
-    documents
+  const {
+    docs,
+    active,
+    openFile,
+    fileChanged,
+    close,
+    closeActive,
+    activate,
+    cycle,
+    toggleSource,
+    pdfLoaded,
+    pdfFailed
+  } = documents
 
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS)
   const [theme, setTheme] = useState<ResolvedTheme>('light')
@@ -101,7 +114,7 @@ export function App(): JSX.Element {
   }, [theme])
 
   useEffect(() => {
-    const title = active ? (active.render?.title ?? active.name) : null
+    const title = active ? (active.render?.title ?? active.pdf?.title ?? active.name) : null
     document.title = title ? `${title} — Marrow` : 'Marrow'
   }, [active])
 
@@ -292,6 +305,10 @@ export function App(): JSX.Element {
         push({ kind: 'error', message: 'Open a document before exporting.' })
         return
       }
+      if (active.kind === 'pdf') {
+        push({ kind: 'info', message: 'Export works on markdown documents; this one is a PDF.' })
+        return
+      }
       const title = active.render?.title ?? active.name
       // A PDF is a printed artefact: it always gets the light palette, however
       // the app happens to be themed. An HTML export keeps what is on screen.
@@ -388,7 +405,10 @@ export function App(): JSX.Element {
           runExport('pdf')
           break
         case 'file:print':
-          void window.marrow.print()
+          // Off-screen PDF pages are not painted, so printing the view would
+          // drop them; the system viewer prints a PDF properly.
+          if (active?.kind === 'pdf') void window.marrow.openLocalFile(active.path)
+          else void window.marrow.print()
           break
         case 'view:toggle-toc':
           toggleToc()
@@ -454,7 +474,7 @@ export function App(): JSX.Element {
 
   /* ------------------------------------------------------------------ views */
 
-  const toc = useMemo(() => active?.render?.toc ?? [], [active])
+  const toc = useMemo(() => active?.render?.toc ?? active?.pdf?.toc ?? [], [active])
   const showSidebar = settings.tocVisible && docs.length > 0
 
   return (
@@ -482,9 +502,12 @@ export function App(): JSX.Element {
               toc={toc}
               activeId={activeHeading}
               documentTitle={active?.name ?? ''}
+              isPdf={active?.kind === 'pdf'}
               onSelect={(id) => {
                 const article = articleRef.current
-                const target = article?.querySelector<HTMLElement>(`#${CSS.escape(id)}`)
+                const page = active?.pdf?.outlinePages[id]
+                const anchor = page === undefined ? id : pageAnchor(page)
+                const target = article?.querySelector<HTMLElement>(`#${CSS.escape(anchor)}`)
                 target?.scrollIntoView({ behavior: 'smooth', block: 'start' })
               }}
             />
@@ -515,16 +538,30 @@ export function App(): JSX.Element {
                     <span>{active.error}</span>
                   </div>
                 )}
-                <Reader
-                  doc={active}
-                  zoom={settings.zoom}
-                  scrollerRef={scrollerRef}
-                  articleRef={articleRef}
-                  pendingHash={pendingHash?.path === active.path ? pendingHash.hash : null}
-                  onHashConsumed={() => setPendingHash(null)}
-                  onOpenPath={openPath}
-                  onActiveHeadingChange={setActiveHeading}
-                />
+                {active.kind === 'pdf' ? (
+                  <PdfView
+                    // One pdf.js document per tab: switching tabs starts fresh.
+                    key={active.path}
+                    doc={active}
+                    zoom={settings.zoom}
+                    scrollerRef={scrollerRef}
+                    articleRef={articleRef}
+                    onLoaded={pdfLoaded}
+                    onFailed={pdfFailed}
+                    onActiveHeadingChange={setActiveHeading}
+                  />
+                ) : (
+                  <Reader
+                    doc={active}
+                    zoom={settings.zoom}
+                    scrollerRef={scrollerRef}
+                    articleRef={articleRef}
+                    pendingHash={pendingHash?.path === active.path ? pendingHash.hash : null}
+                    onHashConsumed={() => setPendingHash(null)}
+                    onOpenPath={openPath}
+                    onActiveHeadingChange={setActiveHeading}
+                  />
+                )}
               </>
             ) : (
               <EmptyState
@@ -541,6 +578,7 @@ export function App(): JSX.Element {
         <StatusBar
           path={active?.path ?? null}
           stats={active?.render?.stats ?? null}
+          pageCount={active?.pdf?.pageCount ?? null}
           zoom={settings.zoom}
           reloadedAt={active?.reloadedAt ?? null}
           busy={active ? active.renderedRevision !== active.revision : false}

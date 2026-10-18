@@ -96,27 +96,34 @@ describe('image resolution', () => {
 describe('link resolution', () => {
   it('tags relative markdown links with their resolved path', async () => {
     const link = await anchor('[x](./other.md)', POSIX_DOC)
-    expect(link?.properties.dataLocalMd).toBe('/home/ada/notes/project/other.md')
+    expect(link?.properties.dataLocalDoc).toBe('/home/ada/notes/project/other.md')
     expect(link?.properties.dataLocalFile).toBeUndefined()
   })
 
   it('keeps the fragment of a relative markdown link separate', async () => {
     const link = await anchor('[x](../index.md#deep-section)', WINDOWS_DOC)
-    expect(link?.properties.dataLocalMd).toBe('C:\\Users\\ada\\notes\\index.md')
+    expect(link?.properties.dataLocalDoc).toBe('C:\\Users\\ada\\notes\\index.md')
     expect(link?.properties.dataHash).toBe('deep-section')
   })
 
   it('recognises every markdown extension as openable', async () => {
     for (const name of ['a.md', 'a.markdown', 'a.mdown', 'a.mkd']) {
       const link = await anchor(`[x](./${name})`, POSIX_DOC)
-      expect(link?.properties.dataLocalMd).toBe(`/home/ada/notes/project/${name}`)
+      expect(link?.properties.dataLocalDoc).toBe(`/home/ada/notes/project/${name}`)
     }
   })
 
+  it('opens linked PDFs in Marrow, dropping the hash', async () => {
+    const link = await anchor('[x](./report.pdf#page=2)', POSIX_DOC)
+    expect(link?.properties.dataLocalDoc).toBe('/home/ada/notes/project/report.pdf')
+    expect(link?.properties.dataHash).toBeUndefined()
+    expect(link?.properties.dataLocalFile).toBeUndefined()
+  })
+
   it('tags other local files for the OS to handle', async () => {
-    const link = await anchor('[x](./report.pdf)', POSIX_DOC)
-    expect(link?.properties.dataLocalFile).toBe('/home/ada/notes/project/report.pdf')
-    expect(link?.properties.dataLocalMd).toBeUndefined()
+    const link = await anchor('[x](./budget.xlsx)', POSIX_DOC)
+    expect(link?.properties.dataLocalFile).toBe('/home/ada/notes/project/budget.xlsx')
+    expect(link?.properties.dataLocalDoc).toBeUndefined()
   })
 
   it('marks external links and hardens the rel attribute', async () => {
@@ -129,12 +136,12 @@ describe('link resolution', () => {
   it('marks in-page anchors', async () => {
     const link = await anchor('[x](#some-heading)', POSIX_DOC)
     expect(link?.properties.dataAnchor).toBe('some-heading')
-    expect(link?.properties.dataLocalMd).toBeUndefined()
+    expect(link?.properties.dataLocalDoc).toBeUndefined()
   })
 
   it('does not resolve links when there is no document path', async () => {
     const link = await anchor('[x](./other.md)', null)
-    expect(link?.properties.dataLocalMd).toBeUndefined()
+    expect(link?.properties.dataLocalDoc).toBeUndefined()
     expect(link?.properties.href).toBe('./other.md')
   })
 

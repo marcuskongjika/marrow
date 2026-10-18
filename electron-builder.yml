@@ -61,6 +61,13 @@ fileAssociations:
     rank: Alternate
     icon: build/icon.ico
     mimeType: text/markdown
+  # Offered under "Open With", never claimed as the default PDF viewer.
+  - ext: pdf
+    name: PDF Document
+    description: PDF Document
+    role: Viewer
+    rank: Alternate
+    mimeType: application/pdf
 
 mac:
   category: public.app-category.productivity

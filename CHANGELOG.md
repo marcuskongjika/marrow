@@ -8,6 +8,27 @@ All notable changes to Marrow are recorded here. The format follows
 
 Nothing yet.
 
+## [0.2.0] - 2026-10-18
+
+### Added
+
+- **PDF reading** — `.pdf` files open in a tab from File ▸ Open, drag-and-drop,
+  "Open With", the command line, or a relative link in a markdown document.
+  Pages render with pdf.js, painted lazily near the viewport; a text layer makes
+  PDF text selectable, copyable and searchable with the existing find bar; PDF
+  bookmarks fill the outline sidebar; zoom, scroll memory and live reload work
+  as they do for markdown. The status bar shows the page count.
+- **macOS release builds** — the release workflow ad-hoc signs the universal
+  app when no Developer ID certificate is configured, so it launches on Apple
+  silicon.
+
+### Changed
+
+- The CSP allows `'wasm-unsafe-eval'` so pdf.js can use its WebAssembly image
+  decoders. `eval` and `Function` remain blocked.
+- Line endings are normalised to LF via `.gitattributes`, which fixes Prettier
+  failing on Windows CI checkouts.
+
 ## [0.1.0] - 2026-10-12
 
 First release.
@@ -55,5 +76,6 @@ First release.
   `wasm-unsafe-eval` are not needed anywhere.
 - Local assets are only served from folders the user has actually opened.
 
-[unreleased]: https://github.com/your-org/marrow/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/your-org/marrow/releases/tag/v0.1.0
+[unreleased]: https://github.com/marcuskongjika/marrow/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/marcuskongjika/marrow/compare/0.1.0...v0.2.0
+[0.1.0]: https://github.com/marcuskongjika/marrow/releases/tag/0.1.0

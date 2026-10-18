@@ -1,16 +1,16 @@
 {
   "name": "marrow",
   "productName": "Marrow",
-  "version": "0.1.0",
-  "description": "A fast, beautiful desktop Markdown viewer. Read your notes down to the bone.",
+  "version": "0.2.0",
+  "description": "A fast, beautiful desktop Markdown and PDF viewer. Read your notes down to the bone.",
   "author": {
     "name": "Marrow Contributors"
   },
   "license": "MIT",
-  "homepage": "https://github.com/your-org/marrow",
+  "homepage": "https://github.com/marcuskongjika/marrow",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/marrow.git"
+    "url": "https://github.com/marcuskongjika/marrow.git"
   },
   "main": "./out/main/index.js",
   "private": true,
@@ -38,7 +38,6 @@
     "dist:dir": "npm run build && electron-builder --dir",
     "typecheck:e2e": "tsc --noEmit -p tsconfig.e2e.json"
   },
-  "dependencies": {},
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.64.0",
@@ -64,6 +63,7 @@
     "hast-util-to-text": "4.0.2",
     "katex": "0.16.47",
     "mermaid": "12.1.0",
+    "pdfjs-dist": "6.4.299",
     "prettier": "3.9.10",
     "react": "19.3.0",
     "react-dom": "19.3.0",
