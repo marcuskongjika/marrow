@@ -49,6 +49,12 @@ jobs:
       - name: Build and package
         shell: bash
         run: |
+          # Missing secrets arrive as empty strings, and electron-builder reads an
+          # empty CSC_LINK as a path (the working directory). Unset them instead.
+          for name in CSC_LINK CSC_KEY_PASSWORD WIN_CSC_LINK WIN_CSC_KEY_PASSWORD \
+            APPLE_ID APPLE_APP_SPECIFIC_PASSWORD APPLE_TEAM_ID; do
+            if [ -z "${!name}" ]; then unset "$name"; fi
+          done
           extra=()
           if [ "$RUNNER_OS" = "macOS" ] && [ -z "$CSC_LINK" ]; then
             # No Developer ID certificate: ad-hoc sign instead of shipping
